@@ -1,0 +1,214 @@
+basePath: /api
+definitions:
+  helloworld.CreateRequest:
+    properties:
+      message:
+        example: Hello, World!
+        maxLength: 20
+        minLength: 1
+        type: string
+    required:
+      - message
+    type: object
+  helloworld.CreateResponse:
+    properties:
+      database:
+        example: SQLite
+        type: string
+      message:
+        example: Hello, World!
+        type: string
+      version:
+        example: 1.0.0
+        type: string
+    type: object
+  response.Response:
+    properties:
+      code:
+        description: Code 状态码，非0时表示自定义HTTP业务状态码
+        example: 0
+        type: integer
+      data:
+        description: Data 响应数据，具体内容因接口而异
+      msg:
+        description: Msg 返回信息，通常是状态描述
+        example: success
+        type: string
+    type: object
+  user.LoginRequest:
+    properties:
+      password:
+        example: password123
+        type: string
+      username:
+        example: john_doe
+        type: string
+    required:
+      - password
+      - username
+    type: object
+  user.LoginResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  user.RegisterRequest:
+    properties:
+      password:
+        example: password123
+        minLength: 6
+        type: string
+      username:
+        example: john_doe
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+      - password
+      - username
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@echohub.dev
+    name: EchoHub Team
+    url: https://github.com/HoronLee/EchoHub
+  description: 基于Gin、Gorm、Viper、Wire、Cobra的HTTP快速开发框架 API 文档
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: EchoHub API 文档
+  version: "1.0"
+paths:
+  /helloworld:
+    post:
+      consumes:
+        - application/json
+      description: 创建一个新的HelloWorld消息并返回系统信息
+      parameters:
+        - description: HelloWorld创建请求参数
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/helloworld.CreateRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: 创建成功，返回消息和系统信息
+          schema:
+            allOf:
+              - $ref: "#/definitions/response.Response"
+              - properties:
+                  data:
+                    $ref: "#/definitions/helloworld.CreateResponse"
+                type: object
+        "400":
+          description: 请求参数错误或创建失败
+          schema:
+            $ref: "#/definitions/response.Response"
+      summary: 创建HelloWorld消息
+      tags:
+        - HelloWorld
+  /user/delete:
+    delete:
+      consumes:
+        - application/json
+      description: 删除当前登录的用户账户
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            allOf:
+              - $ref: "#/definitions/response.Response"
+              - properties:
+                  data:
+                    additionalProperties:
+                      type: string
+                    type: object
+                type: object
+        "400":
+          description: 用户未认证或删除失败
+          schema:
+            $ref: "#/definitions/response.Response"
+        "401":
+          description: 用户未认证
+          schema:
+            $ref: "#/definitions/response.Response"
+      security:
+        - BearerAuth: []
+      summary: 删除用户
+      tags:
+        - 用户管理
+  /user/login:
+    post:
+      consumes:
+        - application/json
+      description: 用户身份验证并获取访问令牌
+      parameters:
+        - description: 登录请求参数
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/user.LoginRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: 登录成功，返回JWT令牌
+          schema:
+            allOf:
+              - $ref: "#/definitions/response.Response"
+              - properties:
+                  data:
+                    $ref: "#/definitions/user.LoginResponse"
+                type: object
+        "400":
+          description: 请求参数错误或登录失败
+          schema:
+            $ref: "#/definitions/response.Response"
+      summary: 用户登录
+      tags:
+        - 用户管理
+  /user/register:
+    post:
+      consumes:
+        - application/json
+      description: 创建新用户账户
+      parameters:
+        - description: 注册请求参数
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/user.RegisterRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: 注册成功
+          schema:
+            allOf:
+              - $ref: "#/definitions/response.Response"
+              - properties:
+                  data:
+                    additionalProperties:
+                      type: string
+                    type: object
+                type: object
+        "400":
+          description: 请求参数错误或注册失败
+          schema:
+            $ref: "#/definitions/response.Response"
+      summary: 用户注册
+      tags:
+        - 用户管理
+schemes:
+  - http
+  - https
+swagger: "2.0"

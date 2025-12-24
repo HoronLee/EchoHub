@@ -1,0 +1,14 @@
+# Swagger Documentation Directory
+
+This directory contains generated Swagger/OpenAPI documentation files.
+
+## Generated Files
+- `docs.go` - Generated Go code containing OpenAPI specification
+- `swagger.json` - JSON format OpenAPI specification  
+- `swagger.yaml` - YAML format OpenAPI specification
+
+## Generation
+Files are generated using the `swag init` command from code annotations.
+
+## Usage
+The generated documentation is automatically imported and served by the application.

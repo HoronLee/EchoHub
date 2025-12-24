@@ -1,0 +1,9 @@
+example/
+bin/
+test/
+Refactor.md
+
+# AI Tools
+.claude/
+.opencode/
+openspec/

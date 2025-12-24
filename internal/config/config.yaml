@@ -1,0 +1,29 @@
+server:
+  port: "8080"
+  host: "0.0.0.0"
+  mode: "debug"
+
+database:
+  type: "mysql"
+  source: "root:password@tcp(127.0.0.1:3306)/echohub?charset=utf8mb4&parseTime=True&loc=Local"
+  logmode: "debug"
+
+auth:
+  jwt:
+    secret: "your-secret-key-change-in-production"
+    expires: 86400
+    issuer: "echohub"
+    audience: "echohub-api"
+
+swagger:
+  host: "localhost:8080"
+  basepath: "/api"
+  schemes: ["http", "https"]
+  title: "EchoHub API 文档"
+  description: "基于Gin、Gorm、Viper、Wire、Cobra的HTTP快速开发框架 API 文档"
+  version: "1.0"
+  contact_name: "EchoHub Team"
+  contact_url: "https://github.com/HoronLee/EchoHub"
+  contact_email: "support@echohub.dev"
+  license_name: "MIT"
+  license_url: "https://opensource.org/licenses/MIT"
