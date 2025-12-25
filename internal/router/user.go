@@ -1,9 +1,6 @@
 package router
 
-import (
-	"github.com/HoronLee/EchoHub/internal/handler"
-	"github.com/HoronLee/EchoHub/internal/middleware"
-)
+import "github.com/HoronLee/EchoHub/internal/handler"
 
 // setupV1UserRoutes 设置 v1 版本的用户路由
 func setupV1UserRoutes(routerGroup *VersionedRouterGroup, h *handler.Handlers) {
@@ -14,5 +11,5 @@ func setupV1UserRoutes(routerGroup *VersionedRouterGroup, h *handler.Handlers) {
 
 	// Private routes - 私有路由，需要 JWT 认证
 	// 路径: DELETE /api/v1/user
-	routerGroup.PrivateRouter.DELETE("/user", h.UserHandler.DeleteUser(), middleware.JwtAuth())
+	routerGroup.PrivateRouter.DELETE("/user", h.UserHandler.DeleteUser())
 }
