@@ -25,7 +25,7 @@ definitions:
   response.Response:
     properties:
       code:
-        description: Code 状态码，非0时表示自定义HTTP业务状态码
+        description: Code 业务状态码，0表示成功，非0表示业务错误
         example: 0
         type: integer
       data:
@@ -81,7 +81,7 @@ info:
   title: EchoHub API 文档
   version: "1.0"
 paths:
-  /helloworld:
+  /v1/helloworld:
     post:
       consumes:
       - application/json
@@ -107,34 +107,7 @@ paths:
       summary: 创建HelloWorld消息
       tags:
       - HelloWorld
-  /user/delete:
-    delete:
-      consumes:
-      - application/json
-      description: 删除当前登录的用户账户
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 删除成功
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: 用户未认证或删除失败
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: 用户未认证
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - BearerAuth: []
-      summary: 删除用户
-      tags:
-      - 用户管理
-  /user/login:
+  /v1/login:
     post:
       consumes:
       - application/json
@@ -160,7 +133,7 @@ paths:
       summary: 用户登录
       tags:
       - 用户管理
-  /user/register:
+  /v1/register:
     post:
       consumes:
       - application/json
@@ -186,6 +159,33 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: 用户注册
+      tags:
+      - 用户管理
+  /v1/user:
+    delete:
+      consumes:
+      - application/json
+      description: 删除当前登录的用户账户
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 用户未认证或删除失败
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 用户未认证
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除用户
       tags:
       - 用户管理
 schemes:

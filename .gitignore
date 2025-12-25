@@ -1,6 +1,7 @@
 example/
 bin/
 test/
+logs/
 Refactor.md
 
 # AI Tools
@@ -10,3 +11,6 @@ openspec/
 session-*.md
 
 configs/debug-config.yaml
+echohub.db
+
+.DS_Store

@@ -2,7 +2,6 @@ package router
 
 import (
 	"github.com/HoronLee/EchoHub/internal/handler"
-	"github.com/HoronLee/EchoHub/internal/middleware"
 	"github.com/labstack/echo/v4"
 )
 
@@ -31,13 +30,11 @@ func setupV1RouterGroup(e *echo.Echo) *VersionedRouterGroup {
 	apiGroup := e.Group("/api")
 	v1Group := apiGroup.Group("/v1")
 
-	public := v1Group.Group("")
-	private := v1Group.Group("")
-	private.Use(middleware.JWTAuthMiddleware()) // JWT认证中间件
-
+	// 所有路由共用同一个组，JWT 中间件在路由级别单独应用
+	// 这样可以避免不存在的路由被 JWT 中间件拦截返回 401
 	return &VersionedRouterGroup{
-		PublicRouter:  public,
-		PrivateRouter: private,
+		PublicRouter:  v1Group,
+		PrivateRouter: v1Group, // 私有路由在注册时单独添加 JWT 中间件
 	}
 }
 

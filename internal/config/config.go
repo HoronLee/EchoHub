@@ -27,9 +27,8 @@ type AppConfig struct {
 		Mode string `mapstructure:"mode"` // 运行模式，可能的值为 "debug" 或 "release"
 	} `mapstructure:"server"`
 	Database struct {
-		Driver  string `mapstructure:"type"`    // 数据库驱动
-		Source  string `mapstructure:"source"`  // 数据库连接字符串
-		LogMode string `mapstructure:"logmode"` // 数据库日志模式
+		Driver string `mapstructure:"type"`   // 数据库驱动
+		Source string `mapstructure:"source"` // 数据库连接字符串
 	} `mapstructure:"database"`
 	Auth struct {
 		Jwt struct {

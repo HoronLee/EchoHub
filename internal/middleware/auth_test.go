@@ -90,7 +90,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// 创建测试路由
 			e := echo.New()
-			e.Use(JWTAuthMiddleware())
+			e.Use(JwtAuth())
 			e.GET("/protected", func(c echo.Context) error {
 				userID := c.Get("user_id")
 				assert.NotNil(t, userID)
@@ -164,7 +164,7 @@ func TestProperty_MiddlewareTokenValidation(t *testing.T) {
 
 			// Create test router with middleware
 			e := echo.New()
-			e.Use(JWTAuthMiddleware())
+			e.Use(JwtAuth())
 
 			contextUserID := uint(0)
 			contextUsername := ""
@@ -199,7 +199,7 @@ func TestProperty_MiddlewareTokenValidation(t *testing.T) {
 		func(invalidHeader string) bool {
 			// Create test router with middleware
 			e := echo.New()
-			e.Use(JWTAuthMiddleware())
+			e.Use(JwtAuth())
 			e.GET("/protected", func(c echo.Context) error {
 				return c.JSON(http.StatusOK, map[string]string{"message": "success"})
 			})
@@ -230,7 +230,7 @@ func TestProperty_MiddlewareTokenValidation(t *testing.T) {
 
 			// Create test router with middleware
 			e := echo.New()
-			e.Use(JWTAuthMiddleware())
+			e.Use(JwtAuth())
 			e.GET("/protected", func(c echo.Context) error {
 				return c.JSON(http.StatusOK, map[string]string{"message": "success"})
 			})

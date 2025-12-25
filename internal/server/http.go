@@ -55,6 +55,9 @@ func NewHTTPServer(
 	// 配置Swagger信息
 	configureSwagger(cfg)
 
+	// 设置自定义错误处理器（必须在中间件之前）
+	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
+
 	// 中间件
 	e.Use(middleware.Logger(logger))
 	e.Use(middleware.Recovery(logger))

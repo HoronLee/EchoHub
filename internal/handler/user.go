@@ -28,22 +28,19 @@ func NewUserHandler(svc *service.UserService) *UserHandler {
 // @Param request body user.RegisterRequest true "注册请求参数"
 // @Success 200 {object} map[string]string "注册成功"
 // @Failure 400 {object} res.Response "请求参数错误或注册失败"
-// @Router /user/register [post]
+// @Router /v1/register [post]
 func (h *UserHandler) Register() echo.HandlerFunc {
 	return res.Execute(func(ctx echo.Context) res.Response {
 		var req user.RegisterRequest
 		if err := ctx.Bind(&req); err != nil {
-			return res.Response{Msg: "Invalid request body", Err: err}
+			return res.BadRequest("Invalid request body", err)
 		}
 
 		if err := h.svc.Register(ctx.Request().Context(), req); err != nil {
-			return res.Response{Msg: "Registration failed", Err: err}
+			return res.InternalServerError("Registration failed", err)
 		}
 
-		return res.Response{
-			Data: map[string]any{"message": "User registered successfully"},
-			Msg:  "success",
-		}
+		return res.Success(map[string]any{"message": "User registered successfully"}, "success")
 	})
 }
 
@@ -56,23 +53,20 @@ func (h *UserHandler) Register() echo.HandlerFunc {
 // @Param request body user.LoginRequest true "登录请求参数"
 // @Success 200 {object} user.LoginResponse "登录成功，返回JWT令牌"
 // @Failure 400 {object} res.Response "请求参数错误或登录失败"
-// @Router /user/login [post]
+// @Router /v1/login [post]
 func (h *UserHandler) Login() echo.HandlerFunc {
 	return res.Execute(func(ctx echo.Context) res.Response {
 		var req user.LoginRequest
 		if err := ctx.Bind(&req); err != nil {
-			return res.Response{Msg: "Invalid request body", Err: err}
+			return res.BadRequest("Invalid request body", err)
 		}
 
 		token, err := h.svc.Login(ctx.Request().Context(), req)
 		if err != nil {
-			return res.Response{Msg: "Login failed", Err: err}
+			return res.Unauthorized("Login failed", err)
 		}
 
-		return res.Response{
-			Data: user.LoginResponse{Token: token},
-			Msg:  "success",
-		}
+		return res.Success(user.LoginResponse{Token: token}, "success")
 	})
 }
 
@@ -86,29 +80,23 @@ func (h *UserHandler) Login() echo.HandlerFunc {
 // @Success 200 {object} map[string]string "删除成功"
 // @Failure 400 {object} res.Response "用户未认证或删除失败"
 // @Failure 401 {object} res.Response "用户未认证"
-// @Router /user/delete [delete]
+// @Router /v1/user [delete]
 func (h *UserHandler) DeleteUser() echo.HandlerFunc {
 	return res.Execute(func(ctx echo.Context) res.Response {
-		// 从JWT中间件获取用户ID（当前登录用户）
 		userIDValue := ctx.Get("user_id")
 		if userIDValue == nil {
-			return res.Response{Msg: "User not authenticated", Err: nil}
+			return res.Unauthorized("User not authenticated")
 		}
 
 		userID, ok := userIDValue.(uint)
 		if !ok {
-			return res.Response{Msg: "Invalid user ID format", Err: nil}
+			return res.BadRequest("Invalid user ID format")
 		}
 
-		// 也可以从URL参数获取要删除的用户ID（如果需要管理员删除其他用户）
-		// 这里简化为删除当前登录用户
 		if err := h.svc.DeleteUser(ctx.Request().Context(), userID); err != nil {
-			return res.Response{Msg: "Failed to delete user", Err: err}
+			return res.InternalServerError("Failed to delete user", err)
 		}
 
-		return res.Response{
-			Data: map[string]any{"message": "User deleted successfully"},
-			Msg:  "success",
-		}
+		return res.Success(map[string]any{"message": "User deleted successfully"}, "success")
 	})
 }

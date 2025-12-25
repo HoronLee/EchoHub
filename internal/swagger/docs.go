@@ -23,7 +23,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/helloworld": {
+        "/v1/helloworld": {
             "post": {
                 "description": "创建一个新的HelloWorld消息并返回系统信息",
                 "consumes": [
@@ -63,50 +63,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/delete": {
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "删除当前登录的用户账户",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户管理"
-                ],
-                "summary": "删除用户",
-                "responses": {
-                    "200": {
-                        "description": "删除成功",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "用户未认证或删除失败",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "用户未认证",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/user/login": {
+        "/v1/login": {
             "post": {
                 "description": "用户身份验证并获取访问令牌",
                 "consumes": [
@@ -146,7 +103,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/register": {
+        "/v1/register": {
             "post": {
                 "description": "创建新用户账户",
                 "consumes": [
@@ -182,6 +139,49 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "请求参数错误或注册失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除当前登录的用户账户",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "删除用户",
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "用户未认证或删除失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "用户未认证",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -226,7 +226,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "description": "Code 状态码，非0时表示自定义HTTP业务状态码",
+                    "description": "Code 业务状态码，0表示成功，非0表示业务错误",
                     "type": "integer",
                     "example": 0
                 },

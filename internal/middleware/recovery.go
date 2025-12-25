@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	commonModel "github.com/HoronLee/EchoHub/internal/model/common"
+	"github.com/HoronLee/EchoHub/internal/response"
 	util "github.com/HoronLee/EchoHub/internal/util/log"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
@@ -49,8 +49,7 @@ func Recovery(logger *util.Logger) echo.MiddlewareFunc {
 						zap.Stack("stacktrace"),
 					)
 
-					// 使用统一的响应格式
-					err = ctx.JSON(http.StatusInternalServerError, commonModel.Fail[string]("Internal server error"))
+					err = ctx.JSON(http.StatusInternalServerError, response.InternalServerError("Internal server error"))
 				}
 			}()
 			return next(ctx)
