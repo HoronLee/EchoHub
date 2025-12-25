@@ -41,7 +41,7 @@ func configureSwagger(cfg *config.AppConfig) {
 
 	description := envUtil.GetEnvOrConfig("SWAGGER_DESCRIPTION", cfg.Swagger.Description)
 	if description == "" {
-		description = "基于Gin、Gorm、Viper、Wire、Cobra的HTTP快速开发框架 API 文档"
+		description = "基于Echo、Gorm、Viper、Wire、Cobra的HTTP快速开发框架 API 文档"
 	}
 
 	version := envUtil.GetEnvOrConfig("SWAGGER_VERSION", cfg.Swagger.Version)

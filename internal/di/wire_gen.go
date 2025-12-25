@@ -12,7 +12,7 @@ import (
 	"github.com/HoronLee/EchoHub/internal/handler"
 	"github.com/HoronLee/EchoHub/internal/server"
 	"github.com/HoronLee/EchoHub/internal/service"
-	util "github.com/HoronLee/EchoHub/internal/util/log"
+	"github.com/HoronLee/EchoHub/internal/util/log"
 )
 
 // Injectors from wire.go:

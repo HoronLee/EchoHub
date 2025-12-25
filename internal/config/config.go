@@ -52,6 +52,14 @@ type AppConfig struct {
 		LicenseName  string   `mapstructure:"license_name"`  // 许可证名称
 		LicenseURL   string   `mapstructure:"license_url"`   // 许可证URL
 	} `mapstructure:"swagger"`
+	CORS struct {
+		AllowOrigins     []string `mapstructure:"allow_origins"`     // 允许的来源列表
+		AllowMethods     []string `mapstructure:"allow_methods"`     // 允许的HTTP方法
+		AllowHeaders     []string `mapstructure:"allow_headers"`     // 允许的请求头
+		ExposeHeaders    []string `mapstructure:"expose_headers"`    // 暴露的响应头
+		AllowCredentials bool     `mapstructure:"allow_credentials"` // 是否允许发送凭证
+		MaxAge           int      `mapstructure:"max_age"`           // 预检请求缓存时间（秒）
+	} `mapstructure:"cors"`
 }
 
 //go:embed config.yaml

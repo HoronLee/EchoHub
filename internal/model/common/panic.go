@@ -9,5 +9,5 @@ const (
 	INIT_DATABASE_PANIC  = "数据库初始化失败"
 	MIGRATE_DB_PANIC     = "数据库迁移失败"
 	INIT_HANDLERS_PANIC  = "Handlers 初始化失败"
-	GIN_RUN_FAILED       = "GIN 启动失败"
+	ECHO_RUN_FAILED      = "Echo 启动失败"
 )

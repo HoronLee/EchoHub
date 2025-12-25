@@ -51,19 +51,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功，返回消息和系统信息",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/helloworld.CreateResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/helloworld.CreateResponse"
                         }
                     },
                     "400": {
@@ -97,22 +85,10 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
@@ -158,19 +134,7 @@ const docTemplate = `{
                     "200": {
                         "description": "登录成功，返回JWT令牌",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/user.LoginResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/user.LoginResponse"
                         }
                     },
                     "400": {
@@ -210,22 +174,10 @@ const docTemplate = `{
                     "200": {
                         "description": "注册成功",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
@@ -344,7 +296,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api",
 	Schemes:          []string{"http", "https"},
 	Title:            "EchoHub API 文档",
-	Description:      "基于Gin、Gorm、Viper、Wire、Cobra的HTTP快速开发框架 API 文档",
+	Description:      "基于Echo、Gorm、Viper、Wire、Cobra的HTTP快速开发框架 API 文档",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

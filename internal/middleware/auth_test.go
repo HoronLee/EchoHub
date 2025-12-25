@@ -9,8 +9,8 @@ import (
 	"github.com/HoronLee/EchoHub/internal/config"
 	"github.com/HoronLee/EchoHub/internal/model/user"
 	jwtUtil "github.com/HoronLee/EchoHub/internal/util/jwt"
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/labstack/echo/v4"
 	"github.com/leanovate/gopter"
 	"github.com/leanovate/gopter/gen"
 	"github.com/leanovate/gopter/prop"
@@ -19,7 +19,6 @@ import (
 
 func TestJWTAuthMiddleware(t *testing.T) {
 	// 设置测试环境
-	gin.SetMode(gin.TestMode)
 	config.JWT_SECRET = []byte("test-secret-key")
 
 	// 创建 JWT 服务
@@ -90,18 +89,18 @@ func TestJWTAuthMiddleware(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// 创建测试路由
-			router := gin.New()
-			router.Use(JWTAuthMiddleware())
-			router.GET("/protected", func(c *gin.Context) {
-				userID, exists := c.Get("user_id")
-				assert.True(t, exists)
+			e := echo.New()
+			e.Use(JWTAuthMiddleware())
+			e.GET("/protected", func(c echo.Context) error {
+				userID := c.Get("user_id")
+				assert.NotNil(t, userID)
 				assert.Equal(t, uint(1), userID)
 
-				username, exists := c.Get("username")
-				assert.True(t, exists)
+				username := c.Get("username")
+				assert.NotNil(t, username)
 				assert.Equal(t, "testuser", username)
 
-				c.JSON(http.StatusOK, gin.H{"message": "success"})
+				return c.JSON(http.StatusOK, map[string]string{"message": "success"})
 			})
 
 			// 创建测试请求
@@ -111,11 +110,11 @@ func TestJWTAuthMiddleware(t *testing.T) {
 			}
 
 			// 执行请求
-			w := httptest.NewRecorder()
-			router.ServeHTTP(w, req)
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
 
 			// 验证响应
-			assert.Equal(t, tt.expectedStatus, w.Code)
+			assert.Equal(t, tt.expectedStatus, rec.Code)
 		})
 	}
 }
@@ -124,7 +123,6 @@ func TestJWTAuthMiddleware(t *testing.T) {
 // Validates: Requirements 3.1, 4.1, 4.5
 func TestProperty_MiddlewareTokenValidation(t *testing.T) {
 	// 设置测试环境
-	gin.SetMode(gin.TestMode)
 	config.JWT_SECRET = []byte("test-secret-key-for-property-testing")
 
 	// 创建 JWT 服务
@@ -165,20 +163,20 @@ func TestProperty_MiddlewareTokenValidation(t *testing.T) {
 			}
 
 			// Create test router with middleware
-			router := gin.New()
-			router.Use(JWTAuthMiddleware())
+			e := echo.New()
+			e.Use(JWTAuthMiddleware())
 
 			contextUserID := uint(0)
 			contextUsername := ""
-			router.GET("/protected", func(c *gin.Context) {
+			e.GET("/protected", func(c echo.Context) error {
 				// Extract user ID from context
-				if id, exists := c.Get("user_id"); exists {
+				if id := c.Get("user_id"); id != nil {
 					contextUserID = id.(uint)
 				}
-				if name, exists := c.Get("username"); exists {
+				if name := c.Get("username"); name != nil {
 					contextUsername = name.(string)
 				}
-				c.JSON(http.StatusOK, gin.H{"message": "success"})
+				return c.JSON(http.StatusOK, map[string]string{"message": "success"})
 			})
 
 			// Create request with valid Bearer token
@@ -186,11 +184,11 @@ func TestProperty_MiddlewareTokenValidation(t *testing.T) {
 			req.Header.Set("Authorization", "Bearer "+token)
 
 			// Execute request
-			w := httptest.NewRecorder()
-			router.ServeHTTP(w, req)
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
 
 			// Verify: Should return 200 and set correct user ID in context
-			return w.Code == http.StatusOK && contextUserID == userID && contextUsername == username
+			return rec.Code == http.StatusOK && contextUserID == userID && contextUsername == username
 		},
 		gen.UIntRange(1, 1000000),
 		gen.AlphaString(),
@@ -200,10 +198,10 @@ func TestProperty_MiddlewareTokenValidation(t *testing.T) {
 	properties.Property("Requests without valid Bearer tokens are rejected", prop.ForAll(
 		func(invalidHeader string) bool {
 			// Create test router with middleware
-			router := gin.New()
-			router.Use(JWTAuthMiddleware())
-			router.GET("/protected", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			e := echo.New()
+			e.Use(JWTAuthMiddleware())
+			e.GET("/protected", func(c echo.Context) error {
+				return c.JSON(http.StatusOK, map[string]string{"message": "success"})
 			})
 
 			// Create request with invalid/missing authorization header
@@ -213,11 +211,11 @@ func TestProperty_MiddlewareTokenValidation(t *testing.T) {
 			}
 
 			// Execute request
-			w := httptest.NewRecorder()
-			router.ServeHTTP(w, req)
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
 
 			// Verify: Should return 401 Unauthorized
-			return w.Code == http.StatusUnauthorized
+			return rec.Code == http.StatusUnauthorized
 		},
 		gen.OneGenOf(gen.Const(""), gen.AlphaString(), gen.Const("Basic token"), gen.Const("token")),
 	))
@@ -231,10 +229,10 @@ func TestProperty_MiddlewareTokenValidation(t *testing.T) {
 			}
 
 			// Create test router with middleware
-			router := gin.New()
-			router.Use(JWTAuthMiddleware())
-			router.GET("/protected", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			e := echo.New()
+			e.Use(JWTAuthMiddleware())
+			e.GET("/protected", func(c echo.Context) error {
+				return c.JSON(http.StatusOK, map[string]string{"message": "success"})
 			})
 
 			// Create request with invalid token
@@ -242,11 +240,11 @@ func TestProperty_MiddlewareTokenValidation(t *testing.T) {
 			req.Header.Set("Authorization", "Bearer "+randomString)
 
 			// Execute request
-			w := httptest.NewRecorder()
-			router.ServeHTTP(w, req)
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
 
 			// Verify: Should return 401 Unauthorized
-			return w.Code == http.StatusUnauthorized
+			return rec.Code == http.StatusUnauthorized
 		},
 		gen.Identifier(),
 	))

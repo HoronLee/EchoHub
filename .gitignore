@@ -7,5 +7,6 @@ Refactor.md
 .claude/
 .opencode/
 openspec/
+session-*.md
 
 configs/debug-config.yaml

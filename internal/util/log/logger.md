@@ -6,7 +6,7 @@
 
 - ✅ 依赖注入：通过 Wire 自动注入
 - ✅ 模式切换：根据 `server.mode` 自动配置
-- ✅ Gin 中间件：自动记录 HTTP 请求
+- ✅ Echo 中间件：自动记录 HTTP 请求
 - ✅ Gorm 集成：数据库查询日志
 - ✅ 高性能：基于 uber-go/zap
 
@@ -134,7 +134,7 @@ internal/
 │   ├── log.go       # 核心日志器
 │   └── gorm.go      # Gorm 适配器
 ├── middleware/
-│   └── logger.go    # Gin 中间件
+│   └── logger.go    # Echo 中间件
 ├── server/
 │   └── server.go    # Logger Provider
 └── data/

@@ -5,8 +5,16 @@ import (
 
 	"github.com/HoronLee/EchoHub/internal/cli"
 	"github.com/HoronLee/EchoHub/internal/config"
+	commonModel "github.com/HoronLee/EchoHub/internal/model/common"
 	"github.com/spf13/cobra"
 )
+
+// 初始化版本信息到 cli 包
+func init() {
+	cli.Version = commonModel.Version
+	cli.BuildTime = commonModel.BuildTime
+	cli.GitCommit = commonModel.GitCommit
+}
 
 var configPath string
 
@@ -14,8 +22,8 @@ var configPath string
 // 默认启动CLI With TUI
 var rootCmd = &cobra.Command{
 	Use:   "echohub",
-	Short: "基于Gin、Gorm、Viper、Wire、Cobra的HTTP快速开发框架",
-	Long:  `基于Gin、Gorm、Viper、Wire、Cobra的HTTP快速开发框架`,
+	Short: "基于Echo、Gorm、Viper、Wire、Cobra的HTTP快速开发框架",
+	Long:  `基于Echo、Gorm、Viper、Wire、Cobra的HTTP快速开发框架`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		config.LoadAppConfig(configPath)
 	},

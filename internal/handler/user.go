@@ -4,7 +4,7 @@ import (
 	"github.com/HoronLee/EchoHub/internal/model/user"
 	res "github.com/HoronLee/EchoHub/internal/response"
 	"github.com/HoronLee/EchoHub/internal/service"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 // UserHandler 用户处理器
@@ -26,22 +26,22 @@ func NewUserHandler(svc *service.UserService) *UserHandler {
 // @Accept json
 // @Produce json
 // @Param request body user.RegisterRequest true "注册请求参数"
-// @Success 200 {object} response.Response{data=map[string]string} "注册成功"
-// @Failure 400 {object} response.Response "请求参数错误或注册失败"
+// @Success 200 {object} map[string]string "注册成功"
+// @Failure 400 {object} res.Response "请求参数错误或注册失败"
 // @Router /user/register [post]
-func (h *UserHandler) Register() gin.HandlerFunc {
-	return res.Execute(func(ctx *gin.Context) res.Response {
+func (h *UserHandler) Register() echo.HandlerFunc {
+	return res.Execute(func(ctx echo.Context) res.Response {
 		var req user.RegisterRequest
-		if err := ctx.ShouldBindJSON(&req); err != nil {
+		if err := ctx.Bind(&req); err != nil {
 			return res.Response{Msg: "Invalid request body", Err: err}
 		}
 
-		if err := h.svc.Register(ctx.Request.Context(), req); err != nil {
+		if err := h.svc.Register(ctx.Request().Context(), req); err != nil {
 			return res.Response{Msg: "Registration failed", Err: err}
 		}
 
 		return res.Response{
-			Data: gin.H{"message": "User registered successfully"},
+			Data: map[string]any{"message": "User registered successfully"},
 			Msg:  "success",
 		}
 	})
@@ -54,17 +54,17 @@ func (h *UserHandler) Register() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param request body user.LoginRequest true "登录请求参数"
-// @Success 200 {object} response.Response{data=user.LoginResponse} "登录成功，返回JWT令牌"
-// @Failure 400 {object} response.Response "请求参数错误或登录失败"
+// @Success 200 {object} user.LoginResponse "登录成功，返回JWT令牌"
+// @Failure 400 {object} res.Response "请求参数错误或登录失败"
 // @Router /user/login [post]
-func (h *UserHandler) Login() gin.HandlerFunc {
-	return res.Execute(func(ctx *gin.Context) res.Response {
+func (h *UserHandler) Login() echo.HandlerFunc {
+	return res.Execute(func(ctx echo.Context) res.Response {
 		var req user.LoginRequest
-		if err := ctx.ShouldBindJSON(&req); err != nil {
+		if err := ctx.Bind(&req); err != nil {
 			return res.Response{Msg: "Invalid request body", Err: err}
 		}
 
-		token, err := h.svc.Login(ctx.Request.Context(), req)
+		token, err := h.svc.Login(ctx.Request().Context(), req)
 		if err != nil {
 			return res.Response{Msg: "Login failed", Err: err}
 		}
@@ -83,15 +83,15 @@ func (h *UserHandler) Login() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} response.Response{data=map[string]string} "删除成功"
-// @Failure 400 {object} response.Response "用户未认证或删除失败"
-// @Failure 401 {object} response.Response "用户未认证"
+// @Success 200 {object} map[string]string "删除成功"
+// @Failure 400 {object} res.Response "用户未认证或删除失败"
+// @Failure 401 {object} res.Response "用户未认证"
 // @Router /user/delete [delete]
-func (h *UserHandler) DeleteUser() gin.HandlerFunc {
-	return res.Execute(func(ctx *gin.Context) res.Response {
+func (h *UserHandler) DeleteUser() echo.HandlerFunc {
+	return res.Execute(func(ctx echo.Context) res.Response {
 		// 从JWT中间件获取用户ID（当前登录用户）
-		userIDValue, exists := ctx.Get("user_id")
-		if !exists {
+		userIDValue := ctx.Get("user_id")
+		if userIDValue == nil {
 			return res.Response{Msg: "User not authenticated", Err: nil}
 		}
 
@@ -102,12 +102,12 @@ func (h *UserHandler) DeleteUser() gin.HandlerFunc {
 
 		// 也可以从URL参数获取要删除的用户ID（如果需要管理员删除其他用户）
 		// 这里简化为删除当前登录用户
-		if err := h.svc.DeleteUser(ctx.Request.Context(), userID); err != nil {
+		if err := h.svc.DeleteUser(ctx.Request().Context(), userID); err != nil {
 			return res.Response{Msg: "Failed to delete user", Err: err}
 		}
 
 		return res.Response{
-			Data: gin.H{"message": "User deleted successfully"},
+			Data: map[string]any{"message": "User deleted successfully"},
 			Msg:  "success",
 		}
 	})

@@ -5,7 +5,7 @@ import (
 
 	commonModel "github.com/HoronLee/EchoHub/internal/model/common"
 	errorUtil "github.com/HoronLee/EchoHub/internal/util/err"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 // Response 代表 handler 层的执行结果封装
@@ -25,24 +25,23 @@ type Response struct {
 }
 
 // Execute 包装器，自动根据 Response 返回统一格式的 HTTP 响应 (仅处理返回类型为JSON的handler)
-func Execute(fn func(ctx *gin.Context) Response) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
+func Execute(fn func(ctx echo.Context) Response) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
 		res := fn(ctx)
 		if res.Err != nil {
-			ctx.JSON(http.StatusBadRequest, commonModel.Fail[string](
+			return ctx.JSON(http.StatusBadRequest, commonModel.Fail[string](
 				errorUtil.HandleError(&commonModel.ServerError{
 					Msg: res.Msg,
 					Err: res.Err,
 				}),
 			))
-			return
 		}
 
 		// 支持自定义 code
 		if res.Code != 0 {
-			ctx.JSON(http.StatusOK, commonModel.OKWithCode(res.Data, res.Code, res.Msg))
+			return ctx.JSON(http.StatusOK, commonModel.OKWithCode(res.Data, res.Code, res.Msg))
 		} else {
-			ctx.JSON(http.StatusOK, commonModel.OK(res.Data, res.Msg))
+			return ctx.JSON(http.StatusOK, commonModel.OK(res.Data, res.Msg))
 		}
 	}
 }

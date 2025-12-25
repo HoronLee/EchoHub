@@ -5,6 +5,8 @@ GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
 BUILD_TIME=$(shell date +%Y-%m-%dT%H:%M:%S)
 GIT_COMMIT=$(shell git rev-parse HEAD)
+MODULE_NAME:=github.com/HoronLee/EchoHub
+VERSION_PACKAGE:=
 
 .PHONY: tidy
 deps:
@@ -25,19 +27,19 @@ swagger-install:
 
 .PHONY: build
 build: swagger wire
-	go build -ldflags "-X main.Version=$(VERSION) -X main.BuildTime=$(BUILD_TIME) -X main.GitCommit=$(GIT_COMMIT)" -o bin/echohub main.go
+	go build -ldflags "-X $(MODULE_NAME)/internal/model/common.Version=$(VERSION) -X $(MODULE_NAME)/internal/model/common.BuildTime=$(BUILD_TIME) -X $(MODULE_NAME)/internal/model/common.GitCommit=$(GIT_COMMIT)" -o bin/echohub .
 
 .PHONY: dev
 dev: swagger
-	go run main.go serve -c configs/debug-config.yaml
+	go run . serve -c configs/debug-config.yaml
 
 .PHONY: prod
 prod: swagger
-	go run main.go serve -c configs/production-config.yaml
+	go run . serve -c configs/production-config.yaml
 
 .PHONY: build-prod
 build-prod: swagger wire
-	CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.Version=$(VERSION) -X main.BuildTime=$(BUILD_TIME) -X main.GitCommit=$(GIT_COMMIT)" -o bin/echohub-prod main.go
+	CGO_ENABLED=0 GOOS=linux go build -ldflags "-X $(MODULE_NAME)/internal/model/common.Version=$(VERSION) -X $(MODULE_NAME)/internal/model/common.BuildTime=$(BUILD_TIME) -X $(MODULE_NAME)/internal/model/common.GitCommit=$(GIT_COMMIT)" -o bin/echohub-prod .
 
 .PHONY: clean
 clean:

@@ -20,10 +20,24 @@ swagger:
   basepath: "/api"
   schemes: ["https"] # 生产环境只使用HTTPS
   title: "EchoHub API 文档"
-  description: "基于Gin、Gorm、Viper、Wire、Cobra的HTTP快速开发框架 API 文档"
+  description: "基于Echo、Gorm、Viper、Wire、Cobra的HTTP快速开发框架 API 文档"
   version: "1.0"
   contact_name: "EchoHub Team"
   contact_url: "https://github.com/HoronLee/EchoHub"
   contact_email: "support@echohub.dev"
   license_name: "MIT"
   license_url: "https://opensource.org/licenses/MIT"
+
+cors:
+  # 生产环境配置具体域名，不要使用 "*"
+  # 开发环境允许所有来源: allow_origins: ["*"]
+  allow_origins:
+    - "https://echohub.com"
+    - "https://www.echohub.com"
+    - "https://api.echohub.com"
+  allow_methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+  allow_headers:
+    ["Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"]
+  expose_headers: ["Content-Length", "Content-Type", "Authorization"]
+  allow_credentials: true # 生产环境启用凭证支持
+  max_age: 86400

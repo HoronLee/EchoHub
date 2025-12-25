@@ -11,10 +11,18 @@ import (
 
 	"github.com/HoronLee/EchoHub/internal/config"
 	"github.com/HoronLee/EchoHub/internal/di"
-	commonModel "github.com/HoronLee/EchoHub/internal/model/common"
 	"github.com/HoronLee/EchoHub/internal/server"
 	"github.com/HoronLee/EchoHub/internal/tui"
 	"github.com/charmbracelet/huh"
+)
+
+var (
+	// Version 版本信息，由 main 包注入
+	Version string
+	// BuildTime 构建时间，由 main 包注入
+	BuildTime string
+	// GitCommit Git 提交哈希，由 main 包注入
+	GitCommit string
 )
 
 var s *server.HTTPServer // s 是全局的 EchoHub 服务器实例
@@ -145,9 +153,10 @@ func DoTui() {
 
 // DoVersion 打印版本信息
 func DoVersion() {
+	version := fmt.Sprintf("%s (构建时间: %s, 提交: %s)", Version, BuildTime, GitCommit)
 	item := struct{ Title, Msg string }{
 		Title: "📦 当前版本",
-		Msg:   "v" + commonModel.Version,
+		Msg:   version,
 	}
 	tui.PrintCLIWithBox(item)
 }

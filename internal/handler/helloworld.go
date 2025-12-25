@@ -5,7 +5,7 @@ import (
 	"github.com/HoronLee/EchoHub/internal/model/helloworld"
 	res "github.com/HoronLee/EchoHub/internal/response"
 	"github.com/HoronLee/EchoHub/internal/service"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 type HelloWorldHandler struct {
@@ -23,21 +23,21 @@ func NewHelloWorldHandler(svc *service.HelloWorldService) *HelloWorldHandler {
 // @Accept json
 // @Produce json
 // @Param request body helloworld.CreateRequest true "HelloWorld创建请求参数"
-// @Success 200 {object} res.Response{data=helloworld.CreateResponse} "创建成功，返回消息和系统信息"
+// @Success 200 {object} helloworld.CreateResponse "创建成功，返回消息和系统信息"
 // @Failure 400 {object} res.Response "请求参数错误或创建失败"
 // @Router /helloworld [post]
-func (h *HelloWorldHandler) PostHelloWorld() gin.HandlerFunc {
-	return res.Execute(func(ctx *gin.Context) res.Response {
+func (h *HelloWorldHandler) PostHelloWorld() echo.HandlerFunc {
+	return res.Execute(func(ctx echo.Context) res.Response {
 		var req helloworld.CreateRequest
-		if err := ctx.ShouldBindJSON(&req); err != nil {
+		if err := ctx.Bind(&req); err != nil {
 			return res.Response{Msg: "", Err: err} // Msg 为空，自动使用 err 详情
 		}
 
-		if err := h.svc.PostHelloWorld(ctx.Request.Context(), req.Message); err != nil {
+		if err := h.svc.PostHelloWorld(ctx.Request().Context(), req.Message); err != nil {
 			return res.Response{Msg: "Failed to create hello world", Err: err}
 		}
 
-		dbInfo, err := h.svc.GetDatabaseInfo(ctx.Request.Context())
+		dbInfo, err := h.svc.GetDatabaseInfo(ctx.Request().Context())
 		if err != nil {
 			return res.Response{Msg: "Failed to get database info", Err: err}
 		}

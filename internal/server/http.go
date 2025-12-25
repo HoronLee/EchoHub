@@ -2,7 +2,7 @@
 //
 // @title EchoHub API 文档
 // @version 1.0
-// @description 基于Gin、Gorm、Viper、Wire、Cobra的HTTP快速开发框架 API 文档
+// @description 基于Echo、Gorm、Viper、Wire、Cobra的HTTP快速开发框架 API 文档
 // @contact.name EchoHub Team
 // @contact.url https://github.com/HoronLee/EchoHub
 // @contact.email support@echohub.dev
@@ -23,14 +23,14 @@ import (
 	"github.com/HoronLee/EchoHub/internal/middleware"
 	"github.com/HoronLee/EchoHub/internal/router"
 	util "github.com/HoronLee/EchoHub/internal/util/log"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 type HTTPServer struct {
 	cfg        *config.AppConfig
-	engine     *gin.Engine
+	echo       *echo.Echo
 	httpServer *http.Server
 	handlers   *handler.Handlers
 	db         *gorm.DB
@@ -43,22 +43,26 @@ func NewHTTPServer(
 	db *gorm.DB,
 	logger *util.Logger,
 ) *HTTPServer {
+	e := echo.New()
+
 	if cfg.Server.Mode == "release" {
-		gin.SetMode(gin.ReleaseMode)
+		e.HideBanner = true
+		e.Debug = false
 	} else {
-		gin.SetMode(gin.DebugMode)
+		e.Debug = true
 	}
 
 	// 配置Swagger信息
 	configureSwagger(cfg)
 
-	engine := gin.New()
-	engine.Use(middleware.Logger(logger))
-	engine.Use(middleware.Recovery(logger))
+	// 中间件
+	e.Use(middleware.Logger(logger))
+	e.Use(middleware.Recovery(logger))
+	e.Use(middleware.CORS(cfg))
 
 	return &HTTPServer{
 		cfg:      cfg,
-		engine:   engine,
+		echo:     e,
 		handlers: handlers,
 		db:       db,
 		logger:   logger,
@@ -66,12 +70,12 @@ func NewHTTPServer(
 }
 
 func (s *HTTPServer) Start() error {
-	router.SetupRouter(s.engine, s.handlers)
+	router.SetupRouter(s.echo, s.handlers)
 
 	addr := fmt.Sprintf("%s:%s", s.cfg.Server.Host, s.cfg.Server.Port)
 	s.httpServer = &http.Server{
 		Addr:    addr,
-		Handler: s.engine,
+		Handler: s.echo,
 	}
 
 	s.logger.Info("Server starting", zap.String("addr", addr))
@@ -93,6 +97,6 @@ func (s *HTTPServer) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (s *HTTPServer) GetEngine() *gin.Engine {
-	return s.engine
+func (s *HTTPServer) GetEcho() *echo.Echo {
+	return s.echo
 }
