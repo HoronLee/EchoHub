@@ -13,10 +13,11 @@ import (
 func JwtAuth() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
-			// 如果匹配到通配符路由（如 /api/v1/*），说明没有具体路由匹配
+			// 如果匹配到 /api/v1/* 兜底通配符，说明没有具体路由匹配
 			// 跳过认证，让框架返回 404
+			// 注意：这里精确匹配，不影响真正的通配符路由（如 /api/v1/files/*）
 			path := ctx.Path()
-			if path == "" || strings.HasSuffix(path, "/*") {
+			if path == "" || path == "/api/v1/*" {
 				return next(ctx)
 			}
 
