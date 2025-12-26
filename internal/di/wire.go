@@ -10,6 +10,7 @@ import (
 	"github.com/HoronLee/EchoHub/internal/server"
 	"github.com/HoronLee/EchoHub/internal/service"
 	"github.com/HoronLee/EchoHub/internal/util/log"
+	"github.com/HoronLee/EchoHub/internal/validator"
 	"github.com/google/wire"
 )
 
@@ -18,6 +19,7 @@ func InitServer(cfg *config.AppConfig) (*server.HTTPServer, func(), error) {
 	wire.Build(
 		log.NewLogger,
 		data.ProviderSet,
+		validator.NewValidator,
 		service.ProviderSet,
 		handler.ProviderSet,
 		server.ProviderSet,

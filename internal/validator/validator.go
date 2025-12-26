@@ -3,8 +3,8 @@ package validator
 import (
 	"reflect"
 	"strings"
-	"sync"
 
+	"github.com/HoronLee/EchoHub/internal/config"
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/zh"
 	ut "github.com/go-playground/universal-translator"
@@ -20,102 +20,138 @@ const (
 	LocaleEnUS = "en_US"
 )
 
-var (
-	once     sync.Once
+// Validator 验证器结构体
+type Validator struct {
 	validate *validator.Validate
-	uni      *ut.UniversalTranslator
 	trans    ut.Translator
-	locale   string = LocaleZhCN // 默认中文
-)
-
-// CustomValidator Echo自定义验证器
-type CustomValidator struct {
-	validator *validator.Validate
+	locale   string
 }
 
-// Validate 实现echo.Validator接口
-func (cv *CustomValidator) Validate(i interface{}) error {
-	return cv.validator.Struct(i)
-}
+// NewValidator 创建验证器实例
+func NewValidator(cfg *config.AppConfig) *Validator {
+	v := &Validator{
+		validate: validator.New(),
+		locale:   cfg.Server.Locale,
+	}
 
-// Init 初始化验证器（单例模式）
-// loc: 语言设置，支持 "zh_CN" 和 "en_US"，默认 "zh_CN"
-func Init(loc ...string) *validator.Validate {
-	once.Do(func() {
-		// 设置语言
-		if len(loc) > 0 && loc[0] != "" {
-			locale = loc[0]
+	if v.locale == "" {
+		v.locale = LocaleZhCN
+	}
+
+	// 使用json tag作为字段名
+	v.validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		if name == "-" {
+			return fld.Name
 		}
-
-		validate = validator.New()
-
-		// 使用json tag作为字段名
-		validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
-			name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-			if name == "-" {
-				return fld.Name
-			}
-			return name
-		})
-
-		// 初始化多语言翻译器
-		initTranslator()
-
-		// 注册自定义验证规则
-		registerCustomValidations(validate)
+		return name
 	})
-	return validate
+
+	// 初始化翻译器
+	v.initTranslator()
+
+	// 注册自定义验证规则
+	v.registerCustomValidations()
+
+	return v
 }
 
 // initTranslator 初始化翻译器
-func initTranslator() {
+func (v *Validator) initTranslator() {
 	zhLocale := zh.New()
 	enLocale := en.New()
-	uni = ut.New(enLocale, zhLocale, enLocale)
+	uni := ut.New(enLocale, zhLocale, enLocale)
 
-	switch locale {
+	switch v.locale {
 	case LocaleEnUS:
-		trans, _ = uni.GetTranslator("en")
-		_ = enTranslations.RegisterDefaultTranslations(validate, trans)
-	default: // 默认中文
-		trans, _ = uni.GetTranslator("zh")
-		_ = zhTranslations.RegisterDefaultTranslations(validate, trans)
+		v.trans, _ = uni.GetTranslator("en")
+		_ = enTranslations.RegisterDefaultTranslations(v.validate, v.trans)
+	default:
+		v.trans, _ = uni.GetTranslator("zh")
+		_ = zhTranslations.RegisterDefaultTranslations(v.validate, v.trans)
 	}
 }
 
-// GetValidator 获取验证器实例
-func GetValidator() *validator.Validate {
-	if validate == nil {
-		Init()
-	}
-	return validate
+// Validate 实现 echo.Validator 接口
+func (v *Validator) Validate(i any) error {
+	return v.validate.Struct(i)
 }
 
-// GetTranslator 获取翻译器
-func GetTranslator() ut.Translator {
-	if trans == nil {
-		Init()
+// ValidateStruct 验证结构体
+func (v *Validator) ValidateStruct(i any) error {
+	return v.validate.Struct(i)
+}
+
+// ValidateVar 验证单个变量
+func (v *Validator) ValidateVar(field any, tag string) error {
+	return v.validate.Var(field, tag)
+}
+
+// BindAndValidate 绑定并验证请求数据
+func (v *Validator) BindAndValidate(c echo.Context, i any) (bool, string) {
+	if err := c.Bind(i); err != nil {
+		return false, v.getBindErrorMessage()
 	}
-	return trans
+	if err := v.validate.Struct(i); err != nil {
+		return false, v.FirstErrorMessage(err)
+	}
+	return true, ""
+}
+
+// TranslateErrors 将验证错误转换为友好的错误信息
+func (v *Validator) TranslateErrors(err error) ValidationErrors {
+	if err == nil {
+		return nil
+	}
+
+	var errors ValidationErrors
+
+	if validationErrs, ok := err.(validator.ValidationErrors); ok {
+		for _, e := range validationErrs {
+			var msg string
+			if v.trans != nil {
+				msg = e.Translate(v.trans)
+			} else {
+				msg = e.Error()
+			}
+			errors = append(errors, ValidationError{
+				Field:   e.Field(),
+				Message: msg,
+			})
+		}
+	} else {
+		errors = append(errors, ValidationError{
+			Field:   "",
+			Message: err.Error(),
+		})
+	}
+
+	return errors
+}
+
+// FirstErrorMessage 获取第一个错误消息
+func (v *Validator) FirstErrorMessage(err error) string {
+	errors := v.TranslateErrors(err)
+	if len(errors) > 0 {
+		return errors[0].Message
+	}
+	return ""
 }
 
 // GetLocale 获取当前语言设置
-func GetLocale() string {
-	return locale
+func (v *Validator) GetLocale() string {
+	return v.locale
 }
 
-// NewEchoValidator 创建Echo验证器
-func NewEchoValidator() *CustomValidator {
-	return &CustomValidator{validator: GetValidator()}
+// getBindErrorMessage 获取绑定错误消息
+func (v *Validator) getBindErrorMessage() string {
+	if v.locale == LocaleEnUS {
+		return "Invalid request format"
+	}
+	return "请求数据格式错误"
 }
 
 // SetupEcho 配置Echo实例的验证器
-// loc: 语言设置，支持 "zh_CN" 和 "en_US"
-func SetupEcho(e *echo.Echo, loc ...string) {
-	if len(loc) > 0 {
-		Init(loc[0])
-	} else {
-		Init()
-	}
-	e.Validator = NewEchoValidator()
+func (v *Validator) SetupEcho(e *echo.Echo) {
+	e.Validator = v
 }

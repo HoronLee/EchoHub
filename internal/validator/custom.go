@@ -11,66 +11,63 @@ import (
 // 自定义验证规则的多语言翻译
 var customTranslations = map[string]map[string]string{
 	"mobile": {
-		"zh_CN": "{0}必须是有效的手机号码",
-		"en_US": "{0} must be a valid mobile number",
+		LocaleZhCN: "{0}必须是有效的手机号码",
+		LocaleEnUS: "{0} must be a valid mobile number",
 	},
 	"username": {
-		"zh_CN": "{0}必须以字母开头，只能包含字母、数字和下划线",
-		"en_US": "{0} must start with a letter and contain only letters, numbers and underscores",
+		LocaleZhCN: "{0}必须以字母开头，只能包含字母、数字和下划线",
+		LocaleEnUS: "{0} must start with a letter and contain only letters, numbers and underscores",
 	},
 	"strongpwd": {
-		"zh_CN": "{0}必须包含大写字母、小写字母和数字",
-		"en_US": "{0} must contain uppercase, lowercase letters and numbers",
+		LocaleZhCN: "{0}必须包含大写字母、小写字母和数字",
+		LocaleEnUS: "{0} must contain uppercase, lowercase letters and numbers",
 	},
 	"chinese_name": {
-		"zh_CN": "{0}必须是有效的中文姓名",
-		"en_US": "{0} must be a valid Chinese name",
+		LocaleZhCN: "{0}必须是有效的中文姓名",
+		LocaleEnUS: "{0} must be a valid Chinese name",
 	},
 	"idcard": {
-		"zh_CN": "{0}必须是有效的身份证号码",
-		"en_US": "{0} must be a valid ID card number",
+		LocaleZhCN: "{0}必须是有效的身份证号码",
+		LocaleEnUS: "{0} must be a valid ID card number",
 	},
 }
 
 // registerCustomValidations 注册自定义验证规则
-func registerCustomValidations(v *validator.Validate) {
+func (v *Validator) registerCustomValidations() {
 	// 手机号验证（中国大陆）
-	_ = v.RegisterValidation("mobile", validateMobile)
+	_ = v.validate.RegisterValidation("mobile", validateMobile)
 
 	// 用户名验证（字母开头，只能包含字母数字下划线）
-	_ = v.RegisterValidation("username", validateUsername)
+	_ = v.validate.RegisterValidation("username", validateUsername)
 
 	// 强密码验证（至少包含大小写字母和数字）
-	_ = v.RegisterValidation("strongpwd", validateStrongPassword)
+	_ = v.validate.RegisterValidation("strongpwd", validateStrongPassword)
 
 	// 中文姓名验证
-	_ = v.RegisterValidation("chinese_name", validateChineseName)
+	_ = v.validate.RegisterValidation("chinese_name", validateChineseName)
 
 	// 身份证号验证
-	_ = v.RegisterValidation("idcard", validateIDCard)
+	_ = v.validate.RegisterValidation("idcard", validateIDCard)
 
 	// 注册自定义翻译
-	registerCustomTranslations(v)
+	v.registerCustomTranslations()
 }
 
 // registerCustomTranslations 注册自定义验证规则的翻译
-func registerCustomTranslations(v *validator.Validate) {
-	t := GetTranslator()
-	if t == nil {
+func (v *Validator) registerCustomTranslations() {
+	if v.trans == nil {
 		return
 	}
 
-	currentLocale := GetLocale()
-
 	for tag, translations := range customTranslations {
 		tagCopy := tag
-		msg := translations[currentLocale]
+		msg := translations[v.locale]
 		if msg == "" {
-			msg = translations[LocaleZhCN] // 回退到中文
+			msg = translations[LocaleZhCN]
 		}
 		msgCopy := msg
 
-		_ = v.RegisterTranslation(tagCopy, t, func(trans ut.Translator) error {
+		_ = v.validate.RegisterTranslation(tagCopy, v.trans, func(trans ut.Translator) error {
 			return trans.Add(tagCopy, msgCopy, true)
 		}, func(trans ut.Translator, fe validator.FieldError) string {
 			translated, _ := trans.T(fe.Tag(), fe.Field())
@@ -79,29 +76,22 @@ func registerCustomTranslations(v *validator.Validate) {
 	}
 }
 
-// RegisterCustomValidation 注册新的自定义验证规则
-// tag: 规则名称
-// fn: 验证函数
-// translations: 多语言翻译 map[locale]message
-func RegisterCustomValidation(tag string, fn validator.Func, translations map[string]string) error {
-	v := GetValidator()
-	if err := v.RegisterValidation(tag, fn); err != nil {
+// RegisterValidation 注册新的自定义验证规则
+func (v *Validator) RegisterValidation(tag string, fn validator.Func, translations map[string]string) error {
+	if err := v.validate.RegisterValidation(tag, fn); err != nil {
 		return err
 	}
 
-	// 注册翻译
-	t := GetTranslator()
-	if t == nil {
+	if v.trans == nil {
 		return nil
 	}
 
-	currentLocale := GetLocale()
-	msg := translations[currentLocale]
+	msg := translations[v.locale]
 	if msg == "" {
 		msg = translations[LocaleZhCN]
 	}
 
-	return v.RegisterTranslation(tag, t, func(trans ut.Translator) error {
+	return v.validate.RegisterTranslation(tag, v.trans, func(trans ut.Translator) error {
 		return trans.Add(tag, msg, true)
 	}, func(trans ut.Translator, fe validator.FieldError) string {
 		translated, _ := trans.T(fe.Tag(), fe.Field())

@@ -11,12 +11,14 @@ import (
 // UserHandler 用户处理器
 type UserHandler struct {
 	svc *service.UserService
+	v   *validator.Validator
 }
 
 // NewUserHandler 创建UserHandler实例
-func NewUserHandler(svc *service.UserService) *UserHandler {
+func NewUserHandler(svc *service.UserService, v *validator.Validator) *UserHandler {
 	return &UserHandler{
 		svc: svc,
+		v:   v,
 	}
 }
 
@@ -33,7 +35,7 @@ func NewUserHandler(svc *service.UserService) *UserHandler {
 func (h *UserHandler) Register() echo.HandlerFunc {
 	return res.Execute(func(ctx echo.Context) res.Response {
 		var req user.RegisterRequest
-		if ok, msg := validator.BindAndValidate(ctx, &req); !ok {
+		if ok, msg := h.v.BindAndValidate(ctx, &req); !ok {
 			return res.ValidationError(msg)
 		}
 
@@ -58,7 +60,7 @@ func (h *UserHandler) Register() echo.HandlerFunc {
 func (h *UserHandler) Login() echo.HandlerFunc {
 	return res.Execute(func(ctx echo.Context) res.Response {
 		var req user.LoginRequest
-		if ok, msg := validator.BindAndValidate(ctx, &req); !ok {
+		if ok, msg := h.v.BindAndValidate(ctx, &req); !ok {
 			return res.ValidationError(msg)
 		}
 

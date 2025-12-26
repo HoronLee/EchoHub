@@ -13,6 +13,7 @@ import (
 	"github.com/HoronLee/EchoHub/internal/server"
 	"github.com/HoronLee/EchoHub/internal/service"
 	"github.com/HoronLee/EchoHub/internal/util/log"
+	"github.com/HoronLee/EchoHub/internal/validator"
 )
 
 // Injectors from wire.go:
@@ -33,9 +34,10 @@ func InitServer(cfg *config.AppConfig) (*server.HTTPServer, func(), error) {
 	helloWorldHandler := handler.NewHelloWorldHandler(helloWorldService)
 	userRepo := data.NewUserRepo(dataData, logger)
 	userService := service.NewUserService(userRepo)
-	userHandler := handler.NewUserHandler(userService)
+	validatorValidator := validator.NewValidator(cfg)
+	userHandler := handler.NewUserHandler(userService, validatorValidator)
 	handlers := handler.NewHandlers(helloWorldHandler, userHandler)
-	httpServer := server.NewHTTPServer(cfg, handlers, db, logger)
+	httpServer := server.NewHTTPServer(cfg, handlers, db, logger, validatorValidator)
 	return httpServer, func() {
 		cleanup()
 	}, nil

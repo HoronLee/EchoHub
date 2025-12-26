@@ -36,6 +36,7 @@ type HTTPServer struct {
 	handlers   *handler.Handlers
 	db         *gorm.DB
 	logger     *util.Logger
+	validator  *validator.Validator
 }
 
 func NewHTTPServer(
@@ -43,6 +44,7 @@ func NewHTTPServer(
 	handlers *handler.Handlers,
 	db *gorm.DB,
 	logger *util.Logger,
+	v *validator.Validator,
 ) *HTTPServer {
 	e := echo.New()
 
@@ -56,8 +58,8 @@ func NewHTTPServer(
 	// 配置Swagger信息
 	configureSwagger(cfg)
 
-	// 配置验证器（传入语言设置）
-	validator.SetupEcho(e, cfg.Server.Locale)
+	// 配置验证器
+	v.SetupEcho(e)
 
 	// 设置自定义错误处理器（必须在中间件之前）
 	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
@@ -68,11 +70,12 @@ func NewHTTPServer(
 	e.Use(middleware.CORS(cfg))
 
 	return &HTTPServer{
-		cfg:      cfg,
-		echo:     e,
-		handlers: handlers,
-		db:       db,
-		logger:   logger,
+		cfg:       cfg,
+		echo:      e,
+		handlers:  handlers,
+		db:        db,
+		logger:    logger,
+		validator: v,
 	}
 }
 
