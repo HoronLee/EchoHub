@@ -28,7 +28,7 @@ func CustomHTTPErrorHandler(err error, c echo.Context) {
 		message = err.Error()
 	}
 
-	util.GetLogger().Error("HTTP error",
+	log.GetLogger().Error("HTTP error",
 		zap.String("path", c.Path()),
 		zap.String("method", c.Request().Method),
 		zap.Int("http_status", code),

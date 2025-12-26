@@ -19,7 +19,7 @@ import (
 
 // InitServer 初始化服务器
 func InitServer(cfg *config.AppConfig) (*server.HTTPServer, func(), error) {
-	logger := util.NewLogger(cfg)
+	logger := log.NewLogger(cfg)
 	db, err := data.NewDB(cfg, logger)
 	if err != nil {
 		return nil, nil, err
@@ -28,10 +28,10 @@ func InitServer(cfg *config.AppConfig) (*server.HTTPServer, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	helloWorldRepo := data.NewHelloWorldRepo(dataData)
+	helloWorldRepo := data.NewHelloWorldRepo(dataData, logger)
 	helloWorldService := service.NewHelloWorldService(helloWorldRepo)
 	helloWorldHandler := handler.NewHelloWorldHandler(helloWorldService)
-	userRepo := data.NewUserRepo(dataData)
+	userRepo := data.NewUserRepo(dataData, logger)
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
 	handlers := handler.NewHandlers(helloWorldHandler, userHandler)

@@ -23,8 +23,8 @@ type UserRepo interface {
 
 // UserService 用户服务实现
 type UserService struct {
-	repo      UserRepo
-	jwtHelper *jwtutil.JWT[user.Claims]
+	repo UserRepo
+	jwt  *jwtutil.JWT[user.Claims]
 }
 
 // NewUserService 创建UserService实例（通过Wire注入）
@@ -33,11 +33,11 @@ func NewUserService(repo UserRepo) *UserService {
 	jwtCfg := &jwtutil.Config{
 		SecretKey: string(config.JWT_SECRET),
 	}
-	jwtHelper := jwtutil.NewJWT[user.Claims](jwtCfg)
+	jwt := jwtutil.NewJWT[user.Claims](jwtCfg)
 
 	return &UserService{
-		repo:      repo,
-		jwtHelper: jwtHelper,
+		repo: repo,
+		jwt:  jwt,
 	}
 }
 
@@ -99,7 +99,7 @@ func (s *UserService) Login(ctx context.Context, req user.LoginRequest) (string,
 		},
 	}
 
-	token, err := s.jwtHelper.GenerateToken(claims)
+	token, err := s.jwt.GenerateToken(claims)
 	if err != nil {
 		return "", err
 	}

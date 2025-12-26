@@ -7,7 +7,7 @@ import (
 	"github.com/HoronLee/EchoHub/internal/config"
 	"github.com/HoronLee/EchoHub/internal/model/helloworld"
 	"github.com/HoronLee/EchoHub/internal/model/user"
-	util "github.com/HoronLee/EchoHub/internal/util/log"
+	"github.com/HoronLee/EchoHub/internal/util/log"
 	"github.com/google/wire"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
@@ -21,11 +21,11 @@ var ProviderSet = wire.NewSet(NewDB, NewData, NewHelloWorldRepo, NewUserRepo)
 // Data 统一的数据访问层结构体
 type Data struct {
 	db  *gorm.DB
-	log *util.Logger
+	log *log.Logger
 }
 
 // NewData 创建Data实例
-func NewData(db *gorm.DB, logger *util.Logger) (*Data, func(), error) {
+func NewData(db *gorm.DB, logger *log.Logger) (*Data, func(), error) {
 	cleanup := func() {
 		logger.Info("closing the data resources")
 	}
@@ -36,7 +36,7 @@ func NewData(db *gorm.DB, logger *util.Logger) (*Data, func(), error) {
 }
 
 // NewDB 创建数据库连接
-func NewDB(cfg *config.AppConfig, logger *util.Logger) (*gorm.DB, error) {
+func NewDB(cfg *config.AppConfig, logger *log.Logger) (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
 	// 根据配置选择数据库驱动
@@ -50,7 +50,7 @@ func NewDB(cfg *config.AppConfig, logger *util.Logger) (*gorm.DB, error) {
 	}
 
 	// 配置GORM日志
-	gormLogger := util.NewGormLogger(logger)
+	gormLogger := log.NewGormLogger(logger)
 
 	// 打开数据库连接
 	db, err := gorm.Open(dialector, &gorm.Config{

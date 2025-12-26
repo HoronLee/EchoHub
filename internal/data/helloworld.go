@@ -5,18 +5,21 @@ import (
 
 	"github.com/HoronLee/EchoHub/internal/model/helloworld"
 	"github.com/HoronLee/EchoHub/internal/service"
+	"github.com/HoronLee/EchoHub/internal/util/log"
 	"go.uber.org/zap"
 )
 
 // helloworldRepo HelloWorld数据访问实现
 type helloworldRepo struct {
 	data *Data
+	log  *log.Logger
 }
 
 // NewHelloWorldRepo 创建HelloWorldRepo实例
-func NewHelloWorldRepo(data *Data) service.HelloWorldRepo {
+func NewHelloWorldRepo(data *Data, logger *log.Logger) service.HelloWorldRepo {
 	return &helloworldRepo{
 		data: data,
+		log:  logger,
 	}
 }
 
