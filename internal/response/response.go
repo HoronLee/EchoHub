@@ -3,7 +3,7 @@ package response
 import (
 	"net/http"
 
-	"github.com/HoronLee/EchoHub/internal/util/log"
+	log "github.com/HoronLee/EchoHub/internal/util/log"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 )
@@ -37,7 +37,7 @@ func Execute(fn func(ctx echo.Context) Response) echo.HandlerFunc {
 		}
 
 		if res.Err != nil {
-			util.GetLogger().Error("Business error",
+			log.GetLogger().Error("Business error",
 				zap.String("path", ctx.Path()),
 				zap.String("method", ctx.Request().Method),
 				zap.Int("http_status", res.HTTPStatus),
@@ -79,6 +79,11 @@ func Error(httpStatus int, code int, msg string, err ...error) Response {
 
 func BadRequest(msg string, err ...error) Response {
 	return Error(http.StatusBadRequest, 400, msg, err...)
+}
+
+// ValidationError 验证错误响应
+func ValidationError(msg string, err ...error) Response {
+	return Error(http.StatusUnprocessableEntity, 422, msg, err...)
 }
 
 func Unauthorized(msg string, err ...error) Response {

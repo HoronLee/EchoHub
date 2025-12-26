@@ -23,6 +23,7 @@ import (
 	"github.com/HoronLee/EchoHub/internal/middleware"
 	"github.com/HoronLee/EchoHub/internal/router"
 	util "github.com/HoronLee/EchoHub/internal/util/log"
+	"github.com/HoronLee/EchoHub/internal/validator"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -54,6 +55,9 @@ func NewHTTPServer(
 
 	// 配置Swagger信息
 	configureSwagger(cfg)
+
+	// 配置验证器
+	validator.SetupEcho(e)
 
 	// 设置自定义错误处理器（必须在中间件之前）
 	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
