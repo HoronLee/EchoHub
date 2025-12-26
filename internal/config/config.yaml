@@ -2,6 +2,7 @@ server:
   port: "8080"
   host: "0.0.0.0"
   mode: "debug"
+  locale: "zh_CN" # 语言设置，可选值: zh_CN, en_US
 
 database:
   type: "mysql"

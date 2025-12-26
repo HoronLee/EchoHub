@@ -56,8 +56,8 @@ func NewHTTPServer(
 	// 配置Swagger信息
 	configureSwagger(cfg)
 
-	// 配置验证器
-	validator.SetupEcho(e)
+	// 配置验证器（传入语言设置）
+	validator.SetupEcho(e, cfg.Server.Locale)
 
 	// 设置自定义错误处理器（必须在中间件之前）
 	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler

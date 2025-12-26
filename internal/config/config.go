@@ -22,9 +22,10 @@ var JWT_SECRET []byte
 // AppConfig 应用程序配置结构体
 type AppConfig struct {
 	Server struct {
-		Port string `mapstructure:"port"` // 服务器端口
-		Host string `mapstructure:"host"` // 服务器主机地址
-		Mode string `mapstructure:"mode"` // 运行模式，可能的值为 "debug" 或 "release"
+		Port   string `mapstructure:"port"`   // 服务器端口
+		Host   string `mapstructure:"host"`   // 服务器主机地址
+		Mode   string `mapstructure:"mode"`   // 运行模式，可能的值为 "debug" 或 "release"
+		Locale string `mapstructure:"locale"` // 语言设置，可选值: zh_CN, en_US，默认 zh_CN
 	} `mapstructure:"server"`
 	Database struct {
 		Driver string `mapstructure:"type"`   // 数据库驱动
