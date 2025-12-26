@@ -4,6 +4,7 @@ import (
 	"github.com/HoronLee/EchoHub/internal/model/user"
 	res "github.com/HoronLee/EchoHub/internal/response"
 	"github.com/HoronLee/EchoHub/internal/service"
+	"github.com/HoronLee/EchoHub/internal/validator"
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,8 +33,8 @@ func NewUserHandler(svc *service.UserService) *UserHandler {
 func (h *UserHandler) Register() echo.HandlerFunc {
 	return res.Execute(func(ctx echo.Context) res.Response {
 		var req user.RegisterRequest
-		if err := ctx.Bind(&req); err != nil {
-			return res.BadRequest("Invalid request body", err)
+		if ok, msg := validator.BindAndValidate(ctx, &req); !ok {
+			return res.ValidationError(msg)
 		}
 
 		if err := h.svc.Register(ctx.Request().Context(), req); err != nil {
@@ -57,13 +58,13 @@ func (h *UserHandler) Register() echo.HandlerFunc {
 func (h *UserHandler) Login() echo.HandlerFunc {
 	return res.Execute(func(ctx echo.Context) res.Response {
 		var req user.LoginRequest
-		if err := ctx.Bind(&req); err != nil {
-			return res.BadRequest("Invalid request body", err)
+		if ok, msg := validator.BindAndValidate(ctx, &req); !ok {
+			return res.ValidationError(msg)
 		}
 
 		token, err := h.svc.Login(ctx.Request().Context(), req)
 		if err != nil {
-			return res.Unauthorized("Login failed", err)
+			return res.Unauthorized(err.Error(), err)
 		}
 
 		return res.Success(user.LoginResponse{Token: token}, "success")
